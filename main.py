@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 import json
 
 class TaskManager:
@@ -26,9 +26,16 @@ class Task():
         self.__id = Task.taskId
         self.__description = desc
         self.__status = "TO do"
-        self.__created = date.today()
-        self.__updated = date.today()
+        self.__created = datetime.now()
+        self.__updated = datetime.now()
         Task.taskId += 1
+
+    def return_task(self, id, description, status, created_at, updated_at):
+        self.__id = id
+        self.__description = description
+        self.__status = status
+        self.__created = created_at
+        self.__updated = updated_at
 
     def desc(self):
         print(self.__description)
@@ -52,7 +59,17 @@ class TaskManagerApllication():
         self.__taskmanager = TaskManager()
         self.__filehandler = FileHandler("task.json")
 
-        #Add loading files from a file here
+
+        data = self.__filehandler.load_file()
+
+        if data is None:
+            return
+        else:
+            for task in data:
+                new_task = Task(task["description"])
+                new_task.return_task(task["id"], task["description"], task["status"], datetime.strptime(task["created_at"], "%Y-%m-%d %H:%M"), datetime.strptime(task["updated_at"], "%Y-%m-%d %H:%M"))
+                self.__taskmanager.add_task(new_task)
+            
 
     def exit(self):
         self.__filehandler.save_file(self.__taskmanager.list())
@@ -92,12 +109,16 @@ class FileHandler():
         self.__filename = filename
 
     def load_file(self):
-        pass
+        try:
+            with open(self.__filename) as f:
+                data = json.load(f)
+                return data
+        except (json.JSONDecodeError, FileNotFoundError):
+            return None
 
     def save_file(self, tasks: list):
         with open(self.__filename, "w") as f:
-            for task in tasks:
-                json.dump(task.to_dict(), f, indent=4)
+            json.dump([p.to_dict() for p in tasks], f, indent=4)
 
 application = TaskManagerApllication()
 application.execute()
