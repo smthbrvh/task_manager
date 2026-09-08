@@ -14,10 +14,11 @@ class TaskManager:
     def list(self):
         return self.__tasks
 
-    def update(self, id):
-        for task in self.__tasks:
-            if task.__id == id:
-                pass
+    def get_task(self, id):
+        for task in self.list():
+            if task.get_id() == id:
+                return task
+        return None
                 
 
 class Task():
@@ -25,7 +26,7 @@ class Task():
     def __init__(self, desc):
         self.__id = Task.taskId
         self.__description = desc
-        self.__status = "TO do"
+        self.__status = "To do"
         self.__created = datetime.now()
         self.__updated = datetime.now()
         Task.taskId += 1
@@ -37,11 +38,14 @@ class Task():
         self.__created = created_at
         self.__updated = updated_at
 
-    def desc(self):
-        print(self.__description)
+    def print_task(self):
+        print(f"{self.__id:<4} {self.__description:<30} {self.__status:<10}")
 
     def change_des(self, description):
         self.__description = description
+
+    def get_id(self):
+        return self.__id
 
     def to_dict(self):
         return {
@@ -79,6 +83,8 @@ class TaskManagerApllication():
         print("exit")
         print("add")
         print("list")
+        print("update")
+        print("delete")
 
     def add(self):
         desc = input("Description: ")
@@ -86,10 +92,25 @@ class TaskManagerApllication():
 
     def list(self):
         print("All tasks: ")
+        print(f"{"ID":<4} {"Description":<30} {"Status":<10}")
         result = self.__taskmanager.list()
         for task in result:
-            print(task.desc())
+            task.print_task()
 
+    def update(self):
+        id = int(input("ID: "))
+
+        task = self.__taskmanager.get_task(id)
+        if task is None:
+            print("Task not found")
+        else:
+            new_description = input("New description: ")
+            task.change_des(new_description)
+
+    def delete(self):
+        pass
+    ###TO DO
+                            
     def execute(self):
         self.help()
         while True:
@@ -102,6 +123,11 @@ class TaskManagerApllication():
                 self.add()
             elif command == "list":
                 self.list()
+            elif command == "update":
+                self.update()
+            elif command == "delete":
+                self.delete()
+
 
 
 class FileHandler():
