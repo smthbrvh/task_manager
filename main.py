@@ -11,6 +11,9 @@ class TaskManager:
         else:
             print("That task is already exists")
 
+    def delete_task(self, id):
+        self.__tasks = [t for t in self.__tasks if t.get_id() != id]
+
     def list(self):
         return self.__tasks
 
@@ -19,14 +22,20 @@ class TaskManager:
             if task.get_id() == id:
                 return task
         return None
-                
+
+    def update_status(self, id, status):
+        task = self.get_task(id)
+        if task is None:
+            return False
+        else:
+            return task.change_status(status)
 
 class Task():
     taskId = 1
     def __init__(self, desc):
         self.__id = Task.taskId
         self.__description = desc
-        self.__status = "To do"
+        self.__status = "todo"
         self.__created = datetime.now()
         self.__updated = datetime.now()
         Task.taskId += 1
@@ -46,6 +55,14 @@ class Task():
 
     def get_id(self):
         return self.__id
+
+    def change_status(self, status):
+        statuses = ["todo", "done", "in-progress"]
+        if status.lower() not in statuses:
+            return False
+        else:
+            self.__status = status.lower()
+            return True
 
     def to_dict(self):
         return {
@@ -82,8 +99,10 @@ class TaskManagerApllication():
         print("commands: ")
         print("exit")
         print("add")
-        print("list")
+        print("list (all)")
+        print("lstat")
         print("update")
+        print("updstat")
         print("delete")
 
     def add(self):
@@ -108,8 +127,18 @@ class TaskManagerApllication():
             task.change_des(new_description)
 
     def delete(self):
-        pass
-    ###TO DO
+        id = int(input("ID: "))
+        self.__taskmanager.delete_task(id)
+        print("Task has been deleted.")
+
+    def update_status(self):
+        id = int(input("ID: "))
+        status = input("Status: (todo, in-progress, done)")
+        request = self.__taskmanager.update_status(id, status)
+        if request:
+            print("Status updated successfully")
+        else:
+            print("Couldnt update status.")
                             
     def execute(self):
         self.help()
@@ -123,10 +152,12 @@ class TaskManagerApllication():
                 self.add()
             elif command == "list":
                 self.list()
-            elif command == "update":
+            elif command == "update (description)":
                 self.update()
             elif command == "delete":
                 self.delete()
+            elif command == "updstat":
+                self.update_status()
 
 
 
