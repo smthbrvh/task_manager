@@ -30,6 +30,16 @@ class TaskManager:
         else:
             return task.change_status(status)
 
+    def get_filtered_tasks(self, status):
+        statuses = ["all", "todo", "in-progress", "done"]
+        status = status.lower()
+        if status not in statuses:
+            return None
+        elif status == "all":
+            return self.list()
+        else:
+            return [task for task in self.list() if task.return_status() == status]
+
 class Task():
     taskId = 1
     def __init__(self, desc):
@@ -46,6 +56,9 @@ class Task():
         self.__status = status
         self.__created = created_at
         self.__updated = updated_at
+
+    def return_status(self):
+        return self.__status
 
     def print_task(self):
         print(f"{self.__id:<4} {self.__description:<30} {self.__status:<10}")
@@ -110,11 +123,15 @@ class TaskManagerApllication():
         self.__taskmanager.add_task(Task(desc))
 
     def list(self):
+        status = input("Status: (all, to-do, in-progress, done)")
         print("All tasks: ")
         print(f"{"ID":<4} {"Description":<30} {"Status":<10}")
-        result = self.__taskmanager.list()
-        for task in result:
-            task.print_task()
+        result = self.__taskmanager.get_filtered_tasks(status)
+        if result is None:
+            print("Couldnt return tasks.")
+        else:
+            for task in result:
+                task.print_task()
 
     def update(self):
         id = int(input("ID: "))
